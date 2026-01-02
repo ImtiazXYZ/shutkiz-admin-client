@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect, useState } from 'react';
 import CardDataStats from '../../components/CardDataStats';
 import ChartOne from '../../components/Charts/ChartOne';
 import ChartThree from '../../components/Charts/ChartThree';
@@ -6,12 +7,34 @@ import ChartTwo from '../../components/Charts/ChartTwo';
 import ChatCard from '../../components/Chat/ChatCard';
 import MapOne from '../../components/Maps/MapOne';
 import TableOne from '../../components/Tables/TableOne';
+import AdminAuth from '../../components/Admin/AdminAuth';
 
 const ECommerce: React.FC = () => {
+  const baseURL = import.meta.env.VITE_SERVER_BASE_URL;
+  const [stats, setStats] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const {http} = AdminAuth();
+
+  useEffect(()=>{
+    fetchStats();
+  },[]);
+
+  const fetchStats=async()=>{
+    setIsLoading(true);
+      try {
+        const res = await http.get(`/admin/dashboard-stats`);
+        setStats(res.data);
+      } catch (error) {
+        console.log(error);
+      }finally{
+        setIsLoading(false);
+      }
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total views" total="$3.456K" rate="0.43%" levelUp>
+        <CardDataStats title="Total views" total={stats.total_views} rate={`${stats.views_percentage_change}%`} levelUp={stats.views_percentage_change > 0} levelDown={stats.views_percentage_change < 0}>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -30,7 +53,7 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Profit" total="$45,2K" rate="4.35%" levelUp>
+        <CardDataStats title="Total Revenue" total={stats.total_revenue} rate={`${stats.revenue_percentage_change}%`} levelUp={stats.revenue_percentage_change > 0} levelDown={stats.revenue_percentage_change < 0}>
           <svg
             className="fill-primary dark:fill-white"
             width="20"
@@ -53,7 +76,7 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Product" total="2.450" rate="2.59%" levelUp>
+        <CardDataStats title="Total Products" total={stats.total_products} rate={`${stats.products_percentage_change}%`} levelUp={stats.products_percentage_change > 0} levelDown={stats.products_percentage_change < 0}>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -72,7 +95,8 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Users" total="3.456" rate="0.95%" levelDown>
+        <CardDataStats title="Total Users" total={stats.total_users} rate={`${stats.users_percentage_change}%`} 
+          levelUp={stats.users_percentage_change > 0} levelDown={stats.users_percentage_change < 0}>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
